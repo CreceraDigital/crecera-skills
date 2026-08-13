@@ -163,6 +163,13 @@
     },
 
     {
+      "_why": "LLM Info is our internal methodology and stays out of the public repo. It appears here only as one item in a list of voice-documenting artefacts, so dropping it leaves the sentence intact.",
+      "pattern": "a voice sample, an LLM-Info doc, brand-voice guidance",
+      "replace": "a voice sample, brand-voice guidance",
+      "regex": false
+    },
+
+    {
       "_why": "migration-analysis names a third-party dev agency and attributes specific mistakes to it. Generic 'dev partner' carries the same lesson without naming anyone.",
       "scope": "migration-analysis/**",
       "pattern": "multi-tab tracker from the dev partner (e.g., Verb Interactive).",

@@ -103,7 +103,7 @@ Split the axes before you act on them:
   short_sentence_share, epistemic_range, hedge_density, contraction_rate,
   section_symmetry. Their remedies ("add sub-7-word sentences", "admit one thing you
   don't know", "let the register relax with contractions") assume an informal voice.
-  **When the client has a voice sample, an LLM-Info doc, brand-voice guidance, or a
+  **When the client has a voice sample, brand-voice guidance, or a
   legal/editorial standard, never edit toward these axes if doing so conflicts with
   that voice.** A low score on them is expected for a formal brand — report it, do
   not remedy it. Example: a formal, legally-reviewed brand voice may forbid contractions
