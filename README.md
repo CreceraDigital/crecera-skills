@@ -9,29 +9,50 @@ machine-specific detail, nothing else. See [What's been scrubbed](#whats-been-sc
 
 ## Install
 
-A skill is just a folder with a `SKILL.md` in it. Drop the ones you want into your
-skills directory and restart Claude Code.
+### As a plugin (recommended)
 
-**All of them:**
+This repo is a plugin marketplace. Inside Claude Code:
 
-```bash
-git clone https://github.com/CreceraDigital/crecera-skills.git
-cp -r crecera-skills/skills/* ~/.claude/skills/
+```
+/plugin marketplace add https://github.com/CreceraDigital/crecera-skills.git
+/plugin install crecera-skills@crecera
 ```
 
-**Just one:**
+That installs all twelve. They're namespaced under the plugin, so they appear as
+`/crecera-skills:roast`, `/crecera-skills:humanizer` and so on — no collisions with
+skills you already have. If the install summary says `Run /reload-plugins to activate`,
+run that.
+
+To update later, `/plugin marketplace update crecera`. To remove,
+`/plugin uninstall crecera-skills@crecera`.
+
+<details>
+<summary>Using <code>owner/repo</code> shorthand instead</summary>
+
+`/plugin marketplace add CreceraDigital/crecera-skills` also works, but GitHub
+shorthand clones over SSH by default. Use the full `.git` URL above unless you have SSH
+keys set up for GitHub, or set `CLAUDE_CODE_PLUGIN_PREFER_HTTPS=1`.
+</details>
+
+### Copying a single skill
+
+A skill is just a folder with a `SKILL.md` in it, so you can take one on its own:
 
 ```bash
 git clone --depth 1 https://github.com/CreceraDigital/crecera-skills.git
 cp -r crecera-skills/skills/roast ~/.claude/skills/
 ```
 
+Or grab a [zip of the repo](https://github.com/CreceraDigital/crecera-skills/archive/refs/heads/main.zip)
+and copy the folders you want out of `skills/`.
+
 Use `~/.claude/skills/` to install for yourself across every project, or
 `.claude/skills/` inside a project to scope it to that repo. On Windows the personal
-path is `%USERPROFILE%\.claude\skills\`.
+path is `%USERPROFILE%\.claude\skills\`. Installed this way the skill keeps its plain
+name — `/roast`, not `/crecera-skills:roast`.
 
-Confirm they loaded with `/help`, or just describe the task — skills trigger from
-their `description`, so most of these fire without you naming them.
+Restart Claude Code, then confirm with `/help`. You mostly won't need to type the
+names: skills trigger from their `description`, so describing the task is enough.
 
 ## The skills
 

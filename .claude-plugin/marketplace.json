@@ -1,0 +1,21 @@
+{
+  "name": "crecera",
+  "owner": {
+    "name": "Crecera Digital",
+    "url": "https://creceradigital.com"
+  },
+  "description": "Scrubbed versions of the Claude Code skills we use at Crecera Digital — SEO, AEO, content and engineering workflow.",
+  "plugins": [
+    {
+      "name": "crecera-skills",
+      "source": "./",
+      "skills": ["./skills/"],
+      "strict": false,
+      "description": "Twelve workflow skills: roast, humanizer, session-handoff, goal, email-strategy, keyword-guidelines, surfer-keyword-tester, hc-rank, migration-analysis, codex, entity-consistency-sweep, framer-code-components.",
+      "author": {
+        "name": "Crecera Digital",
+        "url": "https://creceradigital.com"
+      }
+    }
+  ]
+}
