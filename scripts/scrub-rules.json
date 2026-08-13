@@ -1,0 +1,255 @@
+{
+  "_comment": "Rules for scripts/scrub.py. Edit this file, never the files under skills/ — scrub.py overwrites them.",
+
+  "source_dir": "~/.claude/skills",
+
+  "skills": [
+    "codex",
+    "email-strategy",
+    "entity-consistency-sweep",
+    "framer-code-components",
+    "goal",
+    "hc-rank",
+    "humanizer",
+    "keyword-guidelines",
+    "migration-analysis",
+    "roast",
+    "session-handoff",
+    "surfer-keyword-tester"
+  ],
+
+  "exclude_globs": [
+    "**/calibration/*/",
+    "**/runs/**",
+    "**/output/**",
+    "**/outputs/**",
+    "**/tmp/**",
+    "**/.venv/**",
+    "**/venv/**",
+    "**/node_modules/**",
+    "**/__pycache__/**",
+    "**/.pytest_cache/**",
+    "**/*.pyc",
+    "**/*.pyo",
+    "**/.DS_Store",
+    "**/Thumbs.db",
+    "**/.env",
+    "**/.env.*",
+    "**/*.key",
+    "**/*.pem",
+    "**/credentials*.json",
+    "**/service-account*.json",
+    "**/*.xlsx",
+    "**/*.docx",
+    "**/*.csv"
+  ],
+
+  "replacements": [
+    {
+      "_why": "Absolute Windows/git-bash home paths leak the operator's username.",
+      "pattern": "(?:C:\\\\Users\\\\[A-Za-z0-9._-]+|/c/Users/[A-Za-z0-9._-]+|C:/Users/[A-Za-z0-9._-]+)",
+      "replace": "~",
+      "regex": true
+    },
+    {
+      "_why": "Normalise the backslash form left behind by the rule above.",
+      "pattern": "~\\\\\\.claude",
+      "replace": "~/.claude",
+      "regex": true
+    },
+    {
+      "_why": "Operator email.",
+      "pattern": "[A-Za-z0-9._%+-]+@crecera(?:digital)?\\.(?:com|digital)",
+      "replace": "you@example.com",
+      "regex": true
+    },
+    {
+      "_why": "OneDrive is this operator's sync root; the underlying warning is generic.",
+      "scope": "hc-rank/**",
+      "pattern": "OneDrive tree",
+      "replace": "cloud-synced tree",
+      "regex": false
+    },
+    {
+      "_why": "OneDrive is this operator's sync root; the underlying warning is generic.",
+      "scope": "hc-rank/**",
+      "pattern": "cached OUTSIDE OneDrive",
+      "replace": "cached OUTSIDE any cloud-synced folder",
+      "regex": false
+    },
+
+    {
+      "_why": "humanizer: the shipped weight profile was calibrated on a named client. Rename the profile to the voice archetype it actually encodes.",
+      "scope": "humanizer/**",
+      "pattern": "level-access",
+      "replace": "formal-technical",
+      "regex": false
+    },
+    {
+      "_why": "humanizer: calibration provenance comment names the client's domain.",
+      "scope": "humanizer/**",
+      "pattern": "calibrated\\s+\\d{4}-\\d{2}-\\d{2}\\s+on\\s+10\\s+live\\s+levelaccess\\.com\\s+published",
+      "replace": "calibrated on 10 live client-published",
+      "regex": true
+    },
+    {
+      "_why": "humanizer: residual reference to the client's voice in the same comment block.",
+      "scope": "humanizer/**",
+      "pattern": "(ai). LA's formal, legal-checked",
+      "replace": "(ai). That formal, legal-checked",
+      "regex": false
+    },
+    {
+      "_why": "humanizer: the excluded calibration corpus is referenced from the code comment.",
+      "scope": "humanizer/**",
+      "pattern": "# See calibration/formal-technical/README.md for the separation table.",
+      "replace": "# The corpus behind it was client content and is not distributed; build\n# your own profile the same way with --calibrate.",
+      "regex": false
+    },
+    {
+      "_why": "humanizer: client initials inside inline weight comments; fix phrasing before the generic rule below.",
+      "scope": "humanizer/**",
+      "pattern": "strongest LA discriminator",
+      "replace": "strongest discriminator",
+      "regex": false
+    },
+    {
+      "_why": "humanizer: client initials inside inline weight comments.",
+      "scope": "humanizer/**",
+      "pattern": "LA formal voice avoids fragments",
+      "replace": "this formal voice avoids fragments",
+      "regex": false
+    },
+    {
+      "_why": "humanizer SKILL.md prose naming the client.",
+      "scope": "humanizer/**",
+      "pattern": "Example:\\s+Level\\s+Access\\s+forbids\\s+contractions\\s+and\\s+\"I\\s+don't\\s+know\"\\s+hedging\\s+and\\s+reads\\s+even\\s+by\\s+design,\\s+so",
+      "replace": "Example: a formal, legally-reviewed brand voice may forbid contractions\n  and \"I don't know\" hedging and read deliberately even, so",
+      "regex": true
+    },
+    {
+      "_why": "humanizer SKILL.md profile instructions naming the client.",
+      "scope": "humanizer/**",
+      "pattern": "\\*\\*Level\\s+Access\\s+is\\s+calibrated\\*\\*\\s+—\\s+always\\s+score\\s+LA\\s+content\\s+with\\s+its\\s+profile:",
+      "replace": "One worked profile ships with the skill — `formal-technical`,\nfor formal, legally-reviewed brand voices. Score that kind of content with it:",
+      "regex": true
+    },
+    {
+      "_why": "humanizer SKILL.md threshold guidance naming the client.",
+      "scope": "humanizer/**",
+      "pattern": "For\\s+LA\\s+the\\s+review\\s+threshold",
+      "replace": "Under that profile the review threshold",
+      "regex": true
+    },
+    {
+      "_why": "The calibration corpus is client-published content and is excluded from this repo.",
+      "scope": "humanizer/**",
+      "pattern": "Provenance and the separation table are in\\s+`calibration/formal-technical/README\\.md`\\.",
+      "replace": "The calibration corpus behind it is client content and is not distributed;\nbuild your own with `--calibrate` (below).",
+      "regex": true
+    },
+    {
+      "_why": "Residual client initials in code comments.",
+      "scope": "humanizer/**",
+      "pattern": "\\bLA\\b",
+      "replace": "this profile",
+      "regex": true
+    },
+    {
+      "_why": "Residual client name anywhere in the tree.",
+      "pattern": "Level\\s+Access",
+      "replace": "a formal brand",
+      "regex": true
+    },
+
+    {
+      "_why": "migration-analysis names a third-party dev agency and attributes specific mistakes to it. Generic 'dev partner' carries the same lesson without naming anyone.",
+      "scope": "migration-analysis/**",
+      "pattern": "multi-tab tracker from the dev partner (e.g., Verb Interactive).",
+      "replace": "multi-tab tracker from the dev partner.",
+      "regex": false
+    },
+    {
+      "_why": "As above — skill description.",
+      "scope": "migration-analysis/**",
+      "pattern": "(Verb-style multi-tab .xlsx)",
+      "replace": "(a multi-tab .xlsx)",
+      "regex": false
+    },
+    {
+      "_why": "As above — trigger phrase listing the agency by name.",
+      "scope": "migration-analysis/**",
+      "pattern": "project status workbook, Verb Interactive, IA review",
+      "replace": "project status workbook, IA review",
+      "regex": false
+    },
+    {
+      "_why": "As above — 'Common Verb mistake/pattern' headings attribute errors to a named agency.",
+      "scope": "migration-analysis/**",
+      "pattern": "Common Verb-pattern findings",
+      "replace": "Common dev-partner findings",
+      "regex": false
+    },
+    {
+      "_why": "As above.",
+      "scope": "migration-analysis/**",
+      "pattern": "Common Verb mistake",
+      "replace": "Common mistake",
+      "regex": false
+    },
+    {
+      "_why": "As above.",
+      "scope": "migration-analysis/**",
+      "pattern": "Common Verb pattern",
+      "replace": "Common pattern",
+      "regex": false
+    },
+    {
+      "_why": "As above.",
+      "scope": "migration-analysis/**",
+      "pattern": "Verb-style workbooks",
+      "replace": "these workbooks",
+      "regex": false
+    },
+    {
+      "_why": "Catch-all for any remaining mention of the agency.",
+      "pattern": "Verb\\s+Interactive",
+      "replace": "the dev partner",
+      "regex": true
+    }
+  ],
+
+  "_comment_leak_patterns": "scrub.py FAILS the build if any of these survive into skills/.",
+  "leak_patterns": [
+    "(?i)C:\\\\\\\\Users\\\\\\\\(?!<)",
+    "(?i)/c/Users/",
+    "(?i)onedrive",
+    "(?i)level\\s*access",
+    "(?i)levelaccess",
+    "(?i)userway",
+    "(?i)noble\\s*house",
+    "(?i)\\bnhhr\\b",
+    "(?i)firstup",
+    "(?i)lightsource",
+    "(?i)singlefile",
+    "(?i)\\bownx\\b",
+    "(?i)lear\\s+capital",
+    "(?i)pbi\\s*group",
+    "(?i)decode\\s*data",
+    "(?i)raul\\s*sorrosal",
+    "(?i)definely",
+    "(?i)telestream",
+    "(?i)ondemand\\s*painters",
+    "(?i)recall100",
+    "(?i)promptvalve",
+    "(?i)@crecera",
+    "(?i)verb\\s+interactive",
+    "(?i)\\bverb[- ](?:mistake|pattern|style)",
+    "(?i)common\\s+verb\\b",
+    "sk-[A-Za-z0-9]{16,}",
+    "gh[pousr]_[A-Za-z0-9]{20,}",
+    "AIza[0-9A-Za-z_\\-]{30,}",
+    "(?i)bearer\\s+[A-Za-z0-9._\\-]{20,}",
+    "-----BEGIN [A-Z ]*PRIVATE KEY-----"
+  ]
+}

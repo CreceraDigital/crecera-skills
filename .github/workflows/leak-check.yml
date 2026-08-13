@@ -1,0 +1,24 @@
+name: leak-check
+
+# Scans the published skills/ tree for client names, credential shapes and
+# machine-specific paths. Fails the build on any hit, so a missed redaction
+# never survives a push.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Scan skills/ for leaks
+        run: python scripts/scrub.py --check
