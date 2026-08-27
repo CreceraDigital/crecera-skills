@@ -22,7 +22,10 @@ to source never errors and scales to bulk lists.
 ```bash
 PY=/c/Python314/python   # Windows python.org build
 
-# 1) One-time per release (~2.35 GB download -> ~1 GB Parquet, cached OUTSIDE any cloud-synced folder)
+# 1) One-time per release (~2.35 GB download, cached OUTSIDE any cloud-synced folder).
+#    duckdb is OPTIONAL and auto-skipped on Python 3.14 (it segfaults there); the
+#    build still produces a working streaming-mode index and lookups run fine.
+#    A crash in the optional parquet step can no longer strand the index.
 $PY scripts/hc_rank.py build
 
 # 2) Look up domains
@@ -105,5 +108,10 @@ complementary — a great link the crawler can't reach buys nothing.
 
 - HC is an approximation, refreshed ~monthly — re-`build` when a newer release lands.
 - Domain-level only (matches what metehan reports). Host-level is a future option.
-- Requires `duckdb`, `tldextract`, `requests` (auto-installed on first run); `openpyxl` for XLSX.
-- The build is download-bound (~2.35 GB once); lookups thereafter are sub-second over Parquet.
+- Pure-stdlib by default (gzip + csv) — **no required installs**. `tldextract` improves
+  domain parsing, `openpyxl` enables XLSX, and `duckdb` (optional, non-3.14 only) adds a
+  Parquet fast-path. All are best-effort; the skill runs without any of them.
+- The build is download-bound (~2.35 GB once). In parquet mode lookups are sub-second;
+  in streaming mode, core domains resolve in ~1s but a **NOT-FOUND / peripheral** domain
+  scans the whole .gz (~5 min). For big prospect lists, run on a Python with duckdb
+  (3.11/3.12) so `build` produces the Parquet, or expect longer bulk streaming passes.

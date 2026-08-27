@@ -91,7 +91,9 @@ def registered_domain(domain: str) -> str:
         return ""
     try:  # prefer full Public Suffix List correctness when available
         import tldextract
-        reg = tldextract.extract(host).registered_domain
+        ext = tldextract.extract(host)
+        # `registered_domain` was renamed to `top_domain_under_public_suffix`; support both.
+        reg = getattr(ext, "top_domain_under_public_suffix", None) or ext.registered_domain
         if reg:
             return reg
     except Exception:
@@ -164,12 +166,25 @@ def iter_rows(gz_path: Path):
             yield row
 
 
-def try_build_parquet(gz: Path, parquet: Path) -> bool:
+def _duckdb_usable() -> bool:
+    """duckdb is opt-in and version-gated: it SEGFAULTS on CPython 3.14 (uncatchable),
+    which previously killed `build` before meta.json was written. Skip it there and
+    whenever HC_NO_DUCKDB is set. Streaming mode is always correct, just slower."""
+    if os.environ.get("HC_NO_DUCKDB", "").lower() in ("1", "true", "yes"):
+        return False
+    if sys.version_info[:2] >= (3, 14):
+        return False
     try:
-        import duckdb
+        import duckdb  # noqa: F401
     except Exception:
         return False
-    print(f"duckdb present — building Parquet for fast lookups: {parquet.name}", file=sys.stderr)
+    return True
+
+
+def _parquet_copy(gz: Path, parquet: Path):
+    """The actual duckdb COPY. Runs in a SUBPROCESS (see try_build_parquet) so a
+    native crash cannot take down the parent build."""
+    import duckdb
     con = duckdb.connect()
     con.execute(
         """
@@ -181,7 +196,27 @@ def try_build_parquet(gz: Path, parquet: Path) -> bool:
         [str(gz), str(parquet)],
     )
     con.close()
-    return True
+
+
+def try_build_parquet(gz: Path, parquet: Path) -> bool:
+    """Best-effort Parquet build for fast repeat lookups. Crash-isolated: the duckdb
+    COPY runs in a child process, so a segfault (return code != 0 / killed) just leaves
+    us in streaming mode instead of stranding the whole index."""
+    if not _duckdb_usable():
+        print("duckdb skipped (unusable on this Python / HC_NO_DUCKDB) — streaming mode.",
+              file=sys.stderr)
+        return False
+    import subprocess
+    print(f"duckdb present — building Parquet in isolated subprocess: {parquet.name}",
+          file=sys.stderr)
+    parquet.unlink(missing_ok=True)
+    proc = subprocess.run([sys.executable, __file__, "_parquet", str(gz), str(parquet)])
+    if proc.returncode == 0 and parquet.exists() and parquet.stat().st_size > 0:
+        return True
+    parquet.unlink(missing_ok=True)
+    print(f"  parquet build failed (rc={proc.returncode}) — falling back to streaming mode.",
+          file=sys.stderr)
+    return False
 
 
 def build(release: str, keep_gz: bool):
@@ -204,24 +239,31 @@ def build(release: str, keep_gz: bool):
             pass
     print(f"  {total:,} domains  ({time.time()-t0:.0f}s)", file=sys.stderr)
 
-    has_parquet = try_build_parquet(gz, parquet)
-
+    # Write a WORKING streaming-mode index FIRST, so a later parquet crash can never
+    # strand the build (the old failure mode on Py3.14 + duckdb).
     meta = {
         "release": release,
         "total_count": int(total),
         "gz": str(gz),
-        "parquet": str(parquet) if has_parquet else None,
+        "parquet": None,
         "ranks_url": ranks_url(release),
         "built_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
     meta_path().write_text(json.dumps(meta, indent=2))
-    # Keep the .gz unless parquet exists AND user didn't ask to keep it.
-    if has_parquet and not keep_gz:
-        gz.unlink(missing_ok=True)
-        print(f"Removed {gz.name} (Parquet built; pass --keep-gz to retain the .gz).",
+    print(f"Index ready (streaming .gz mode): {total:,} domains from {release}.", file=sys.stderr)
+
+    # Best-effort upgrade to Parquet for sub-second repeat lookups. Crash-isolated.
+    has_parquet = try_build_parquet(gz, parquet)
+    if has_parquet:
+        meta["parquet"] = str(parquet)
+        meta_path().write_text(json.dumps(meta, indent=2))
+        # Keep the .gz unless parquet exists AND user didn't ask to keep it.
+        if not keep_gz:
+            gz.unlink(missing_ok=True)
+            print(f"Removed {gz.name} (Parquet built; pass --keep-gz to retain the .gz).",
+                  file=sys.stderr)
+        print(f"Upgraded index to parquet mode: {total:,} domains from {release}.",
               file=sys.stderr)
-    print(f"Built index: {total:,} domains from {release} "
-          f"({'parquet' if has_parquet else 'streaming .gz'} mode).", file=sys.stderr)
 
 
 # ------------------------------------------------------------------------ lookup
@@ -243,7 +285,7 @@ def query_domains(domains):
     keys = {k for k in rev.values() if k}
     by_key = {}
 
-    if meta.get("parquet") and Path(meta["parquet"]).exists():
+    if meta.get("parquet") and Path(meta["parquet"]).exists() and _duckdb_usable():
         import duckdb
         con = duckdb.connect()
         ph = ",".join("?" for _ in keys)
@@ -402,8 +444,15 @@ def main():
 
     sub.add_parser("releases", help="List available web-graph releases")
 
+    # Hidden: internal subprocess entry point for the crash-isolated parquet build.
+    pq = sub.add_parser("_parquet", add_help=False)
+    pq.add_argument("gz")
+    pq.add_argument("parquet")
+
     args = p.parse_args()
-    if args.command == "build":
+    if args.command == "_parquet":
+        _parquet_copy(Path(args.gz), Path(args.parquet))
+    elif args.command == "build":
         build(args.release, args.keep_gz)
     elif args.command == "lookup":
         cmd_lookup(args.domains)

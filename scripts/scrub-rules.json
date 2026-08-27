@@ -24,6 +24,7 @@
     "**/output/**",
     "**/outputs/**",
     "**/tmp/**",
+    "**/codex/req*.json",
     "**/.venv/**",
     "**/venv/**",
     "**/node_modules/**",
