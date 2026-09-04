@@ -58,9 +58,9 @@ names: skills trigger from their `description`, so describing the task is enough
 
 | Skill | What it does | Needs |
 | --- | --- | --- |
-| [`roast`](skills/roast) | Convenes a 5-persona adversarial council to attack an idea, then a Judge returns one GO / RESHAPE / KILL verdict and the cheapest test to de-risk it. Antidote to Claude agreeing with you. | — |
+| [`roast`](skills/roast) | Convenes a 5-persona adversarial council to attack an idea, then a Judge returns one GO / RESHAPE / KILL verdict and the cheapest test to de-risk it. Antidote to Claude agreeing with you. Adapted from [Nate Herk](https://www.nateherk.com/)'s skill, free in his [AI Automation Society](https://www.skool.com/ai-automation-society) Skool community. | — |
 | [`humanizer`](skills/humanizer) | Scores a draft on structural fingerprints of machine writing (burstiness, signpost density, specificity, epistemic range) and repairs them. Ships a Python scorer and a calibration workflow for per-brand weight profiles. | Python 3 |
-| [`session-handoff`](skills/session-handoff) | Structured end-of-session summary — decisions, shipped changes, running state, deferrals, open questions — so a fresh context can pick up cleanly. Chat-only, writes nothing. | — |
+| [`session-handoff`](skills/session-handoff) | Structured end-of-session summary — decisions, shipped changes, running state, deferrals, open questions — so a fresh context can pick up cleanly. Chat-only, writes nothing. Adapted from [Nate Herk](https://www.nateherk.com/)'s skill, free in his [AI Automation Society](https://www.skool.com/ai-automation-society) Skool community. | — |
 | [`goal`](skills/goal) | Runs a task autonomously toward an explicit definition of done, self-driving until the condition is met. | — |
 | [`email-strategy`](skills/email-strategy) | Email promotion strategy plus ready-to-send copy: launches, flash sales, webinars, price increases, BFCM, promo sequences. | — |
 | [`keyword-guidelines`](skills/keyword-guidelines) | Content brief for a target query — structure ranges, term frequency ranges, questions, competitor topics and grouped facts. A drop-in replacement for Surfer's content-editor export. | DataForSEO |

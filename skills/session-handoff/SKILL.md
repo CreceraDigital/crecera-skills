@@ -77,3 +77,7 @@ User says: "session handoff", "wrap up session", "hand off", "handoff summary", 
 - Writing the summary to `~/.claude/handoffs/` or any file. This is chat-only by design.
 - Adding a "what went well / what went poorly" retrospective. This isn't a retro.
 - Recommending next steps beyond the single "Pick up here" line. The next agent decides; you just hand off.
+
+## Credit
+
+Adapted from the `/session-handoff` skill by [Nate Herk](https://www.nateherk.com/), available free in his [AI Automation Society](https://www.skool.com/ai-automation-society) Skool community.

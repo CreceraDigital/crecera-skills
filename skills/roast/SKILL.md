@@ -79,3 +79,7 @@ Then list the five council scores in one line: `Contrarian X/10 · Expansionist 
 - The Judge must make an actual call. "It depends" is not a verdict. Pick GO, RESHAPE, or KILL and own it.
 - The cheapest 48-hour test is the most important output. It's how the user finds out if they're right without building the whole thing.
 - Keep the final verdict skimmable. The council does the depth; the Judge does the decision.
+
+## Credit
+
+Adapted from the `/roast` skill by [Nate Herk](https://www.nateherk.com/), available free in his [AI Automation Society](https://www.skool.com/ai-automation-society) Skool community.
